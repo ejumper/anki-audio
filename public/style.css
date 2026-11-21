@@ -1,0 +1,539 @@
+/* anki-audio — Anki-like theme (light default, [data-theme="dark"] override),
+   full-viewport flex, safe-area aware. */
+
+:root {
+  color-scheme: light;
+  --bg: #f0f0f2;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #7a7d83;
+  --line: #e2e3e7;
+  --new: #1a6fd4;      /* new count  — blue   */
+  --learn: #d43f3f;    /* learn count — red    */
+  --review: #2e8b3d;   /* review count — green */
+  --total: #8a8d93;    /* total — gray         */
+  --accent: #0a64c6;
+  --accent-contrast: #ffffff;   /* text on accent-filled controls */
+  --chip-bg: #e4e5ea;           /* sync/caching chip surface      */
+  --chip-text: #55585e;
+  --row-active: #f6f7f9;        /* pressed deck row               */
+  --danger: #d43f3f;            /* clear-cache confirm fill (white text) */
+  --ok: #2e8b3d;                /* clear-cache cleared fill   (white text) */
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  touch-action: manipulation; /* no double-tap/pinch zoom — the app owns taps */
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.view[hidden] { display: none; }
+
+/* ------------------------------- top bars ------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 6px 12px;
+  padding-top: calc(6px + env(safe-area-inset-top, 0px));
+}
+
+.topbar .title {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: right; /* titles hug the right; gear/back sit top-left */
+}
+
+.back {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 34px;
+  line-height: 1;
+  padding: 0 8px;
+  margin-left: -4px;
+  cursor: pointer;
+}
+
+/* mute toggle (review top bar) — only the ACTIVE icon shows: blue speaker
+   when unmuted (inherited accent), red speaker-off when muted. The `hidden`
+   attribute on SVG children is unreliable (UA display rules lose to author
+   rules), so visibility is driven purely off data-muted. */
+.mute-btn[data-muted="true"] {
+  color: var(--danger);
+}
+
+.mute-btn .mute-on {
+  display: block;
+}
+
+.mute-btn .mute-off {
+  display: none;
+}
+
+.mute-btn[data-muted="true"] .mute-on {
+  display: none;
+}
+
+.mute-btn[data-muted="true"] .mute-off {
+  display: block;
+}
+
+/* settings gear — same tap target as .back (inline SVG, no external assets) */
+.settings-gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  min-height: 34px;
+}
+
+.settings-gear svg { display: block; }
+
+.chips {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* counts + chips hug the right edge of the review top bar */
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.chip {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--chip-text);
+  background: var(--chip-bg);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.chip[hidden] { display: none; }
+
+/* live counts strip (new / learn / review / left) */
+.counts {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.counts[hidden] { display: none; }
+
+.counts span { min-width: 30px; text-align: right; }
+.counts .c-new { color: var(--new); }
+.counts .c-learn { color: var(--learn); }
+.counts .c-review { color: var(--review); }
+.counts .c-left {
+  min-width: 0;
+  color: var(--total);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ------------------------------ deck list ------------------------------- */
+
+.deck-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.deck-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 24px);
+  margin: 0 12px 8px;
+  padding: 15px 14px;
+  background: var(--card);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.deck-row:active { background: var(--row-active); }
+
+.deck-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-counts {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.deck-counts span {
+  min-width: 36px;   /* fixed-width count columns, like Anki */
+  text-align: right;
+}
+
+.deck-counts .dc-new { color: var(--new); }
+.deck-counts .dc-learn { color: var(--learn); }
+.deck-counts .dc-review { color: var(--review); }
+.deck-counts .dc-total { color: var(--total); }
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  font-size: 14px;
+  padding: 32px 16px;
+}
+
+/* -------------------------------- stage ---------------------------------- */
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none; /* no native long-press callout — the app owns holds */
+}
+
+.card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 22px;
+}
+
+.card-inner {
+  margin: auto;
+  max-width: 46rem;
+  text-align: center;
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  font-size: clamp(21px, 4.6vw, 30px);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.card-inner img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.4em auto;
+}
+
+.card-inner a { color: var(--accent); }
+
+.card-inner pre {
+  white-space: pre-wrap;
+  font-size: 0.8em;
+  text-align: left;
+}
+
+/* ------------------------------ rated state ------------------------------ */
+
+/* confirm bar under the still-visible back: chosen label + gesture hint */
+.rated {
+  flex: 0 0 auto;
+  padding: 4px 16px 16px;
+  text-align: center;
+}
+
+.rated-label {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.rated-hint {
+  margin-top: 7px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------- waiting / messages -------------------------- */
+
+.waiting {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* ------------------------------- settings -------------------------------- */
+
+.settings-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 0 calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.settings-section {
+  margin: 14px 12px 0;
+}
+
+.settings-heading {
+  margin: 0 2px 7px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.settings-card {
+  background: var(--card);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+}
+
+.settings-help {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* segmented Light/Dark control */
+.segmented {
+  display: flex;
+  gap: 6px;
+}
+
+.seg-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.seg-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* five playback-speed chips in one row */
+.speed-row {
+  display: flex;
+  flex-wrap: wrap; /* seven chips wrap 4+3 on narrow screens instead of clipping */
+  gap: 6px;
+}
+
+.speed-chip {
+  flex: 1 0 64px;
+  padding: 10px 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.speed-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* storage: size line + two-step clear button */
+.storage-size {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.storage-size span {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.clear-cache-btn {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.clear-cache-btn.confirm {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.clear-cache-btn.done {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+
+.clear-cache-btn:disabled { opacity: 0.75; }
+
+/* tts replacement rows */
+.replace-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.replace-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px; /* iOS zooms focused inputs below 16px — never allow */
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+.replace-input::placeholder { color: var(--muted); }
+.replace-input:focus { outline: none; border-color: var(--accent); }
+
+.replace-remove {
+  flex: 0 0 auto;
+  width: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.replace-remove:active {
+  color: var(--learn);
+  border-color: var(--learn);
+}
+
+.add-replace {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ------------------------------ dark theme ------------------------------- */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #17171a;
+  --card: #242429;
+  --text: #e9e9ec;
+  --muted: #9a9aa2;
+  --line: #35353b;
+  --new: #58a6ff;      /* brighter count colors for dark */
+  --learn: #ff7b72;
+  --review: #56d364;
+  --total: #9a9aa2;
+  --accent: #79b8ff;
+  --accent-contrast: #0d1117;   /* dark text on bright accent fill */
+  --chip-bg: #33333a;
+  --chip-text: #b4b4bc;
+  --row-active: #2d2d34;
+}
+
+/* Anki template <style> blocks hardcode light colors AND light backgrounds
+   (their `.card` rule collides with the app's wrapper) — force readable text
+   and dark-safe backgrounds without touching template layout. */
+[data-theme="dark"] .card {
+  background-color: var(--bg) !important;
+}
+[data-theme="dark"] .card-inner,
+[data-theme="dark"] .card-inner * {
+  color: var(--text) !important;
+  background-color: transparent !important;
+}

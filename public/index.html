@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#f0f0f2">
+  <title>Anki Audio</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Anki Audio">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Deck list (Anki-like) -->
+  <div id="deck-view" class="view">
+    <header class="topbar">
+      <button id="settings-btn" class="back settings-gear" type="button" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.08a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.08a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+      <div class="title">Anki Audio</div>
+      <span id="deck-sync-chip" class="chip" hidden>syncing…</span>
+    </header>
+    <main id="deck-list" class="deck-list"></main>
+  </div>
+
+  <!-- Review -->
+  <div id="review-view" class="view" hidden>
+    <header class="topbar">
+      <button id="back-btn" class="back" type="button" aria-label="Back to decks">&lsaquo;</button>
+      <div class="topbar-right">
+        <button id="mute-btn" class="back mute-btn" type="button" aria-label="Mute TTS" aria-pressed="false">
+          <svg class="mute-on" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg class="mute-off" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+        <div id="counts" class="counts" hidden>
+          <span id="cnt-new" class="c-new">0</span>
+          <span id="cnt-learn" class="c-learn">0</span>
+          <span id="cnt-review" class="c-review">0</span>
+          <span id="cnt-left" class="c-left">0 left</span>
+        </div>
+        <div class="chips">
+          <span id="caching-chip" class="chip" hidden></span>
+          <span id="review-sync-chip" class="chip" hidden>syncing…</span>
+        </div>
+      </div>
+    </header>
+    <main id="stage" class="stage"></main>
+  </div>
+
+  <!-- Settings -->
+  <div id="settings-view" class="view" hidden>
+    <header class="topbar">
+      <button id="settings-back-btn" class="back" type="button" aria-label="Back to decks">&lsaquo;</button>
+      <div class="title">Settings</div>
+    </header>
+    <main class="settings-list">
+      <section class="settings-section">
+        <h2 class="settings-heading">Appearance</h2>
+        <div class="settings-card">
+          <div class="segmented" role="group" aria-label="Appearance">
+            <button class="seg-btn" data-theme-choice="light" type="button">Light</button>
+            <button class="seg-btn" data-theme-choice="dark" type="button">Dark</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 class="settings-heading">Playback speed</h2>
+        <div class="settings-card">
+          <div class="speed-row" role="group" aria-label="Playback speed">
+            <button class="speed-chip" data-speed="0.5" type="button">0.5×</button>
+            <button class="speed-chip" data-speed="0.75" type="button">0.75×</button>
+            <button class="speed-chip" data-speed="0.8" type="button">0.8×</button>
+            <button class="speed-chip" data-speed="0.9" type="button">0.9×</button>
+            <button class="speed-chip" data-speed="1" type="button">1×</button>
+            <button class="speed-chip" data-speed="1.25" type="button">1.25×</button>
+            <button class="speed-chip" data-speed="1.5" type="button">1.5×</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 class="settings-heading">Storage</h2>
+        <div class="settings-card">
+          <p class="storage-size">Cached audio: <span id="cache-size">…</span></p>
+          <button id="clear-cache-btn" class="clear-cache-btn" type="button">Clear audio cache</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2 class="settings-heading">TTS replacements</h2>
+        <div class="settings-card">
+          <p class="settings-help">applied to card text before it is spoken — for blanks, acronyms, and technical terms</p>
+          <div id="repl-rows"></div>
+          <button id="repl-add" class="add-replace" type="button" aria-label="Add replacement row">+</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
